@@ -9,12 +9,7 @@ Lumberjack is an alternative to Python's built-in `logging` package with the goa
   - Standard streams (e.g. `stdout`)
   - Files
 - Globally make all loggers send logs to `list[pathlib.Path]`
-- Color!
-  - <span style="color:cyan">NOISE</span>
-  - <span style="color:cyan">DEBUG</span>
-  - <span style="color:white">INFO</span>
-  - <span style="color:yellow">WARNING</span>
-  - <span style="color:red">ERROR</span>
+- Customizeable colors for noise/debug/info/warning/error log levels 🖍️
 - Banners in case user wants to make a section of logging stand out
 - Register callbacks to be called when logging at specific log levels
 
