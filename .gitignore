@@ -1,0 +1,12 @@
+**/venv/
+*.pyc
+.idea
+
+# Build stuff
+build/
+dist/
+*.egg-info
+
+# MacOS meta files
+.DS_Store
+
