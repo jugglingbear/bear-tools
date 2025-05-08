@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
+
 @dataclass
 class CallbackConfig:
     """
@@ -10,4 +11,3 @@ class CallbackConfig:
     callback:       Callable[[str], None]
     add_timestamps: bool
     add_caller:     bool
-

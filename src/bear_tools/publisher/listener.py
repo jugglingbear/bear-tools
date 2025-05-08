@@ -1,6 +1,7 @@
 import abc
 from typing import Any
 
+
 class Listener(abc.ABC):
     """
     <<< Abstract Base Class >>>
@@ -27,4 +28,3 @@ class Listener(abc.ABC):
         """
 
         pass
-

@@ -1,0 +1,8 @@
+[flake8]
+# E221: multiple spaces before operator, E241: multiple spaces after ':'
+ignore = E221, E222, E241, E303
+max-line-length = 120
+exclude = 
+    .git,
+    __pycache__,
+    .venv

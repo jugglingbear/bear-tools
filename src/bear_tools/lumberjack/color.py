@@ -28,11 +28,11 @@ class PrintColor(enum.Enum):
     BROWN  = '\033[38;5;94m'
     BLACK  = '\033[90m'
 
-
     # Turn off special coloring
     COLOR_OFF = '\033[0m'
 
-def print_color(message: str, color: PrintColor | str, path: TextIO = sys.stdout, end: str ='\n') -> None:
+
+def print_color(message: str, color: PrintColor | str, path: TextIO = sys.stdout, end: str = '\n') -> None:
     """
     Print to stdout in a specific color
 
@@ -57,4 +57,3 @@ def get_color_str(message: str, color: PrintColor | str) -> str:
 
     color = color.value if isinstance(color, PrintColor) else color
     return f'{color}{message}{PrintColor.COLOR_OFF.value}'
-

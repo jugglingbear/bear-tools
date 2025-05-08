@@ -1,6 +1,5 @@
 from __future__ import annotations
 import datetime
-import enum
 import inspect
 import io
 from pathlib import Path
@@ -10,6 +9,7 @@ from typing import Callable, TextIO
 
 from bear_tools.lumberjack import CallbackConfig, LogLevel, print_color, PrintColor
 
+
 class Logger:
     """
     The main logging class
@@ -17,14 +17,16 @@ class Logger:
 
     global_output_paths: list[Path] = []  # All Logger instances everywhere will log to these paths (optional)
 
-    def __init__(self,
-                 log_level: LogLevel = LogLevel.INFO,
-                 output_paths: list[Path | TextIO] | None = None,
-                 default_color: str | None = None,
-                 signature: str | None = None,
-                 add_caller: bool = True,
-                 add_timestamps: bool = True,
-                 ignore_global_paths: bool = False):
+    def __init__(
+        self,
+        log_level: LogLevel = LogLevel.INFO,
+        output_paths: list[Path | TextIO] | None = None,
+        default_color: str | None = None,
+        signature: str | None = None,
+        add_caller: bool = True,
+        add_timestamps: bool = True,
+        ignore_global_paths: bool = False
+    ):
         """
         Initializer
 
@@ -139,7 +141,7 @@ class Logger:
         self.__log(LogLevel.WARNING, text, color)
 
 
-    def error(self, text: str, color: PrintColor | str | None = PrintColor.RED):
+    def error(self, text: str, color: PrintColor | str | None = PrintColor.RED) -> None:
         """
         Log message if current log level is LogLevel.ERROR or lower
 
@@ -150,12 +152,13 @@ class Logger:
         self.__log(LogLevel.ERROR, text, color)
 
 
-    def register_callback(self,
-                          log_level: LogLevel,
-                          callback: Callable[[str], None],
-                          add_timestamps: bool = True,
-                          add_caller: bool = True
-                          ) -> bool:
+    def register_callback(
+        self,
+        log_level: LogLevel,
+        callback: Callable[[str], None],
+        add_timestamps: bool = True,
+        add_caller: bool = True
+    ) -> bool:
         """
         Register a callback for a specific log level
 
@@ -270,4 +273,3 @@ class Logger:
                             f' {text}'
                         )
                         _config.callback(_message)
-

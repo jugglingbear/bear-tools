@@ -101,4 +101,3 @@ class Publisher(abc.ABC, threading.Thread):
         """
 
         pass
-

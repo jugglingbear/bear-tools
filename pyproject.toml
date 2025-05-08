@@ -13,7 +13,23 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.10"
 pytest = "^8.2.0"
+ruamel-yaml = "^0.18.6"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+pytest-cov = "^6.1.1"
+pytest-mock = "^3.14.0"
+pytest-watch = "^4.2.0"
+flake8 = "^7.2.0"
+poethepoet = "^0.34.0"
+mkdocs-material = "^9.6.12"
+mypy = "^1.15.0"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q"
+testpaths = "tests"
+python_files = ["test_*.py"]
 
 [build-system]
 requires = ["poetry-core"]
