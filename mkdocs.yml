@@ -1,0 +1,18 @@
+site_name: Bear Tools
+nav:
+  - Home: README.md
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+    - content.heading.anchor
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: "🔗"

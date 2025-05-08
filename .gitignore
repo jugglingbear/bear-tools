@@ -1,12 +1,12 @@
 **/venv/
 *.pyc
 .idea
+.DS_Store
 
-# Build stuff
+# Build artifacts
 build/
 dist/
 *.egg-info
 
-# MacOS meta files
-.DS_Store
-
+# Mkdocs artifacts
+site
