@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bear-tools"
-version = "0.1.2"
+version = "0.1.3"
 description = "An assortment of QA/Automation related tools"
 authors = ["Sean Foley <sean.foley.engr@gmail.com>"]
 license = "MIT"
@@ -20,10 +20,11 @@ pytest = "^8.3.5"
 pytest-cov = "^6.1.1"
 pytest-mock = "^3.14.0"
 pytest-watch = "^4.2.0"
-flake8 = "^7.2.0"
 poethepoet = "^0.34.0"
 mkdocs-material = "^9.6.12"
 mypy = "^1.15.0"
+pylint = "^3.3.7"
+flake8 = "^7.2.0"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -34,3 +35,10 @@ python_files = ["test_*.py"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Pylint overrides
+[tool.pylint."MESSAGES CONTROL"]
+max-line-length = 120
+disable = [
+    "C0114",  # Missing module docstring
+]

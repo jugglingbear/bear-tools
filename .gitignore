@@ -8,5 +8,8 @@ build/
 dist/
 *.egg-info
 
+# Mypy artifacts
+.coverage
+
 # Mkdocs artifacts
 site
