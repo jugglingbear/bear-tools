@@ -21,7 +21,7 @@ class Logger:
         self,
         log_level: LogLevel = LogLevel.INFO,
         output_paths: list[Path | TextIO] | None = None,
-        default_color: str | None = None,
+        default_color: PrintColor = PrintColor.COLOR_OFF,
         signature: str | None = None,
         add_caller: bool = True,
         add_timestamps: bool = True,
@@ -39,12 +39,12 @@ class Logger:
         :param ignore_global_paths: If True, do not obey the global paths logic; otherwise, do
         """
 
-        self.__log_level:         LogLevel            = log_level
-        self.add_caller:          bool                = add_caller
-        self.add_timestamps:      bool                = add_timestamps
-        self.ignore_global_paths: bool                = ignore_global_paths
-        self.default_color:       str | None          = default_color
-        self.signature:           str | None          = signature
+        self.__log_level:         LogLevel   = log_level
+        self.add_caller:          bool       = add_caller
+        self.add_timestamps:      bool       = add_timestamps
+        self.ignore_global_paths: bool       = ignore_global_paths
+        self.default_color:       PrintColor = default_color
+        self.signature:           str | None = signature
 
         self.__callbacks: dict[LogLevel, list[CallbackConfig]] = {}
 
