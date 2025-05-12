@@ -6,8 +6,8 @@ help:
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: coverage
-coverage: src/bear_tools  ## Run unit tests and show code coverage report
-	@echo '🎯 Analyzing unit test code coverage'
+coverage: src/bear_tools  ## Analyze test code coverage
+	@echo '🎯 Analyzing test code coverage'
 	poetry run pytest --cov=src/bear_tools --cov-report=term-missing --cov-context=test
 
 .PHONY: clean
