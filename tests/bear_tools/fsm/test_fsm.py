@@ -1,5 +1,5 @@
 # pylint: disable=C0103
-# type: ignore[comparison-overlap]
+
 from enum import Enum
 
 import pytest
@@ -28,6 +28,22 @@ def test_initial_state() -> None:
     assert fsm.state == State.START
 
 
+def test_register_get_state_callback() -> None:
+    """Tests that the override mechanics for the get-current-state work as expected"""
+
+    def get_state() -> State:
+        """Get customized current state"""
+        return next(states)
+
+    states = iter([State.FINISHED, State.COMPLETED, State.PROCESSING, State.START])
+    fsm = FSM[State, Input](State.START, {})
+    fsm.register_get_state_callback(get_state)
+    assert fsm.state == State.FINISHED
+    assert fsm.state == State.COMPLETED   # type: ignore[comparison-overlap]
+    assert fsm.state == State.PROCESSING
+    assert fsm.state == State.START
+
+
 def test_transition_valid() -> None:
     """Tests a valid transition from START to PROCESSING on ACTION_A"""
 
@@ -44,7 +60,7 @@ def test_transition_valid() -> None:
     assert fsm.state == State.PROCESSING
     next_state = fsm.transition(Input.INPUT_B)
     assert next_state == State.COMPLETED
-    assert fsm.state == State.COMPLETED
+    assert fsm.state == State.COMPLETED  # type: ignore[comparison-overlap]
     next_state = fsm.transition(None)
     assert next_state == State.FINISHED
     assert fsm.state == State.FINISHED
@@ -65,7 +81,7 @@ def test_transition_invalid() -> None:
         fsm.transition(Input.INPUT_B)  # Attempt an invalid transition
 
 
-def test_bind_input_handler() -> None:
+def test_register_input_handler() -> None:
     """Tests binding a callback to an FSM input and ensuring it is called on transition."""
 
     was_callback_called: bool = False
@@ -82,6 +98,6 @@ def test_bind_input_handler() -> None:
         }
     )
 
-    fsm.bind_input_handler(Input.INPUT_A, input_a_callback)
+    fsm.register_input_handler(Input.INPUT_A, input_a_callback)
     fsm.transition(Input.INPUT_A)
     assert was_callback_called

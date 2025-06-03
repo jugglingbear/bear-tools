@@ -16,9 +16,22 @@ class FSM(Generic[State, Input]):
         :param transitions: A table of all possible transitions that the FSM can take
         """
 
-        self.state: State = initial
-        self._input_handlers: dict[Input, Callable[..., None]] = {}
+        self._state: State = initial
         self._transitions: dict[tuple[State, Input | None], State] = transitions
+
+        self._input_handlers: dict[Input, Callable[..., None]] = {}
+        self._current_state_handler: Callable[..., State] | None = None
+
+
+    @property
+    def state(self) -> State:
+        """
+        Get the current state
+        """
+
+        if self._current_state_handler is not None:
+            return self._current_state_handler()
+        return self._state
 
 
     def transition(self, action: Input | None) -> State:
@@ -34,7 +47,7 @@ class FSM(Generic[State, Input]):
             raise ValueError(f"Invalid transition: {self.state.name} + {action.name if action is not None else None}")
 
         next_state: State = self._transitions[key]
-        self.state = next_state
+        self._state = next_state
 
         if action in self._input_handlers:
             self._input_handlers[action]()
@@ -42,7 +55,7 @@ class FSM(Generic[State, Input]):
         return self.state
 
 
-    def bind_input_handler(self, action: Input, callback: Callable[..., None]) -> None:
+    def register_input_handler(self, action: Input, callback: Callable[..., None]) -> None:
         """
         Associate a callback with an FSM input
 
@@ -51,3 +64,13 @@ class FSM(Generic[State, Input]):
         """
 
         self._input_handlers[action] = callback
+
+
+    def register_get_state_callback(self, callback: Callable[..., State] | None) -> None:
+        """
+        Override the FSM's default current-state tracking mechanics with a method that determines the current state
+
+        Note: Setting the value to None disables the override
+        """
+
+        self._current_state_handler = callback
