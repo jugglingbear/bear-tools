@@ -3,7 +3,7 @@ from enum import Enum
 
 import pytest
 
-from bear_tools.fsm.fsm import FSM
+from bear_tools.fsm import FSM
 
 
 class State(Enum):
