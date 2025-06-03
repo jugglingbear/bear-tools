@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "DavidAnson.vscode-markdownlint",
+    "docker.docker",
+    "Gruntfuggly.todo-tree",
+    "jebbs.plantuml",
+    "mblet.highlight-regex",
+    "ms-python.debugpy",
+    "ms-python.flake8",
+    "ms-python.mypy-type-checker",
+    "ms-python.pylint",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "njpwerner.autodocstring",
+    "oderwat.indent-rainbow",
+    "redhat.vscode-yaml",
+    "tamasfe.even-better-toml"
+  ]
+}

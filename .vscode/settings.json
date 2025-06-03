@@ -1,8 +1,75 @@
 {
-  "mypy-type-checker.args": ["--strict"],
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "python.linting.flake8Enabled": true,
-  "python.linting.flake8Path": "flake8",
-  "python.linting.lintOnSave": true
+    "editor.rulers": [120],
+    "mypy-type-checker.args": ["--strict"],
+    "autoDocstring.docstringFormat": "sphinx-notypes",
+    "autoDocstring.includeName": false,
+    "autoDocstring.includeExtendedSummary": false,
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]",
+        "This is a test"
+    ],
+    "todo-tree.highlights.customHighlight": {
+        "TODO": {
+            "icon": "check",
+            "type": "tag",
+            "foreground": "#FFFF00",
+            "background": "#000000"
+        },
+        "FIXME": {
+            "icon": "flame",
+            "type": "tag",
+            "foreground": "#FF5555",
+            "background": "#000000"
+        }
+    },
+    "todo-tree.filtering.includeGlobs": [
+        "**/*.py"
+    ],
+    "highlight.regex.regexes": [
+        {
+            "languageIds": [ "plaintext" ],
+            "regexes": [
+                {
+                    "regex": "(error|cannot|no such|failed to).*",
+                    "regexFlag": "gmi",
+                    "regexLimit": 10000,
+                    "decorations": [
+                        {
+                            "index": 0,
+                            "backgroundColor": "#FF0000",
+                            "color": "#FFFFFF"
+                        }
+                    ]
+                },
+                {
+                    "regex": "(Command.log_action).*",
+                    "regexFlag": "gmi",
+                    "regexLimit": 10000,
+                    "decorations": [
+                        {
+                            "index": 0,
+                            "backgroundColor": "#166F16",
+                            "color": "#FFFFFF"
+                        }
+                    ]
+                },
+            ]
+        }
+    ],
+    "plantuml.server": "http://localhost:8080",
+    "plantuml.render": "Local",
+    "plantuml.jar": "/opt/homebrew/Cellar/plantuml/1.2025.2/libexec/plantuml.jar",
+    "plantuml.java": "/usr/bin/java",
+    "plantuml.jarArgs": [
+        
+    ],
+    "highlight.regex.workspace.regexes": [
+        
+    ]
 }

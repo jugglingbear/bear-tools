@@ -1,6 +1,8 @@
 **/venv/
 *.pyc
 .idea
+.cache
+**/__pycache__
 .DS_Store
 
 # Build artifacts
@@ -8,7 +10,7 @@ build/
 dist/
 *.egg-info
 
-# Mypy artifacts
+# Linting
 .coverage
 
 # Mkdocs artifacts

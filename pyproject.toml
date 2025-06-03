@@ -25,6 +25,7 @@ mkdocs-material = "^9.6.12"
 mypy = "^1.15.0"
 pylint = "^3.3.7"
 flake8 = "^7.2.0"
+ruff = "^0.11.12"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -36,9 +37,20 @@ python_files = ["test_*.py"]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-# Pylint overrides
+# MyPy Configuration
+[tool.mypy]
+show_error_context = true
+pretty = true
+
+# Pylint configuration
 [tool.pylint."MESSAGES CONTROL"]
 max-line-length = 120
 disable = [
     "C0114",  # Missing module docstring
 ]
+
+# Ruff configuration
+[tool.ruff]
+line-length = 120
+lint.select = ["E", "F", "I", "T"]
+ignore = ["T201"]
