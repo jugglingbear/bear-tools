@@ -1,4 +1,5 @@
 # pylint: disable=C0103
+# type: ignore[comparison-overlap]
 from enum import Enum
 
 import pytest
@@ -11,6 +12,7 @@ class State(Enum):
     START      = 1
     PROCESSING = 2
     COMPLETED  = 3
+    FINISHED   = 4
 
 
 class Input(Enum):
@@ -34,11 +36,18 @@ def test_transition_valid() -> None:
         {
             (State.START,      Input.INPUT_A): State.PROCESSING,
             (State.PROCESSING, Input.INPUT_B): State.COMPLETED,
+            (State.COMPLETED,  None):          State.FINISHED,
         }
     )
     next_state: State = fsm.transition(Input.INPUT_A)
     assert next_state == State.PROCESSING
     assert fsm.state == State.PROCESSING
+    next_state = fsm.transition(Input.INPUT_B)
+    assert next_state == State.COMPLETED
+    assert fsm.state == State.COMPLETED
+    next_state = fsm.transition(None)
+    assert next_state == State.FINISHED
+    assert fsm.state == State.FINISHED
 
 
 def test_transition_invalid() -> None:

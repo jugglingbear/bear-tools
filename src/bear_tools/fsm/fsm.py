@@ -17,11 +17,11 @@ class FSM(Generic[State, Input]):
         """
 
         self.state: State = initial
-        self._input_handlers: dict[Input, Callable[[], None]] = {}
+        self._input_handlers: dict[Input, Callable[..., None]] = {}
         self._transitions: dict[tuple[State, Input | None], State] = transitions
 
 
-    def transition(self, action: Input) -> State:
+    def transition(self, action: Input | None) -> State:
         """
         Get the next state in the FSM given an input
 
@@ -29,9 +29,9 @@ class FSM(Generic[State, Input]):
         :raises ValueError: If FSM is unable to transition to next state
         """
 
-        key: tuple[State, Input] = (self.state, action)
+        key: tuple[State, Input | None] = (self.state, action)
         if key not in self._transitions:
-            raise ValueError(f"Invalid transition: {self.state.name} + {action.name}")
+            raise ValueError(f"Invalid transition: {self.state.name} + {action.name if action is not None else None}")
 
         next_state: State = self._transitions[key]
         self.state = next_state
@@ -42,7 +42,7 @@ class FSM(Generic[State, Input]):
         return self.state
 
 
-    def bind_input_handler(self, action: Input, callback: Callable[[], None]) -> None:
+    def bind_input_handler(self, action: Input, callback: Callable[..., None]) -> None:
         """
         Associate a callback with an FSM input
 
