@@ -48,9 +48,19 @@ class FSM(Generic[State, Input]):
 
         next_state: State = self._transitions[key]
         self._state = next_state
-
         if action in self._input_handlers:
             self._input_handlers[action]()
+
+        # Check for epsilon transitions
+        previous_state: State = self.state
+        while (key := (self.state, None)) in self._transitions:
+            next_state = self._transitions[key]
+            self._state = next_state
+            if action in self._input_handlers:
+                self._input_handlers[action]()
+            if previous_state == self.state:
+                break
+            previous_state = self.state
 
         return self.state
 

@@ -17,8 +17,8 @@ class State(Enum):
 
 class Input(Enum):
     """Test inputs"""
-    INPUT_A = 1
-    INPUT_B = 2
+    PROCESS  = 1
+    COMPLETE = 2
 
 
 def test_initial_state() -> None:
@@ -50,20 +50,17 @@ def test_transition_valid() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.INPUT_A): State.PROCESSING,
-            (State.PROCESSING, Input.INPUT_B): State.COMPLETED,
-            (State.COMPLETED,  None):          State.FINISHED,
+            (State.START,      Input.PROCESS):  State.PROCESSING,
+            (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
+            (State.COMPLETED,  None):           State.FINISHED,
         }
     )
-    next_state: State = fsm.transition(Input.INPUT_A)
+    next_state: State = fsm.transition(Input.PROCESS)
     assert next_state == State.PROCESSING
     assert fsm.state == State.PROCESSING
-    next_state = fsm.transition(Input.INPUT_B)
-    assert next_state == State.COMPLETED
-    assert fsm.state == State.COMPLETED  # type: ignore[comparison-overlap]
-    next_state = fsm.transition(None)
-    assert next_state == State.FINISHED
-    assert fsm.state == State.FINISHED
+    next_state = fsm.transition(Input.COMPLETE)
+    assert next_state == State.FINISHED  # Automatically transition from COMPLETE to FINISHED on epsilon input
+    assert fsm.state == State.FINISHED   # type: ignore[comparison-overlap]
 
 
 def test_transition_invalid() -> None:
@@ -72,13 +69,13 @@ def test_transition_invalid() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.INPUT_A): State.PROCESSING,
-            (State.PROCESSING, Input.INPUT_B): State.COMPLETED,
+            (State.START,      Input.PROCESS): State.PROCESSING,
+            (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
         }
     )
 
     with pytest.raises(ValueError):
-        fsm.transition(Input.INPUT_B)  # Attempt an invalid transition
+        fsm.transition(Input.COMPLETE)  # Attempt an invalid transition
 
 
 def test_register_input_handler() -> None:
@@ -93,11 +90,11 @@ def test_register_input_handler() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.INPUT_A): State.PROCESSING,
-            (State.PROCESSING, Input.INPUT_B): State.COMPLETED,
+            (State.START,      Input.PROCESS): State.PROCESSING,
+            (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
         }
     )
 
-    fsm.register_input_handler(Input.INPUT_A, input_a_callback)
-    fsm.transition(Input.INPUT_A)
+    fsm.register_input_handler(Input.PROCESS, input_a_callback)
+    fsm.transition(Input.PROCESS)
     assert was_callback_called
