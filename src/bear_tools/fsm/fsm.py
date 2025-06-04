@@ -21,6 +21,7 @@ class FSM(Generic[State, Input]):
 
         self._input_handlers: dict[Input, Callable[..., None]] = {}
         self._current_state_handler: Callable[..., State] | None = None
+        self._jump_to_state_handler: Callable[[State], bool] | None = None
 
 
     @property
@@ -32,6 +33,21 @@ class FSM(Generic[State, Input]):
         if self._current_state_handler is not None:
             return self._current_state_handler()
         return self._state
+
+
+    def jump_to_state(self, state: State) -> bool:
+        """
+        Jump directly to a specific state
+        """
+
+        success: bool = True
+        if self._jump_to_state_handler is not None:
+            success = self._jump_to_state_handler(state)
+            if success:
+                self._state = state
+        else:
+            self._state = state
+        return success
 
 
     def transition(self, action: Input | None) -> State:
@@ -65,9 +81,9 @@ class FSM(Generic[State, Input]):
         return self.state
 
 
-    def register_input_handler(self, action: Input, callback: Callable[..., None]) -> None:
+    def register_input_callback(self, action: Input, callback: Callable[..., None]) -> None:
         """
-        Associate a callback with an FSM input
+        Register a function to be called whenever the FSM transitions on a specific Input
 
         :param action: An FSM input
         :param callback: A function to call when the FSM transitions on {action}
@@ -78,9 +94,20 @@ class FSM(Generic[State, Input]):
 
     def register_get_state_callback(self, callback: Callable[..., State] | None) -> None:
         """
-        Override the FSM's default current-state tracking mechanics with a method that determines the current state
+        Register a function to be used to determine the FSM's current state rather than the default action of
+        inspecting self._state
 
-        Note: Setting the value to None disables the override
+        Note: Setting the value to None returns system to default behavior
         """
 
         self._current_state_handler = callback
+
+
+    def register_jump_to_state_callback(self, callback: Callable[[State], bool] | None) -> None:
+        """
+        Register a function to be called whenever jumping directly to a state in the FSM
+
+        Note: Setting the value to None returns system to default behavior
+        """
+
+        self._jump_to_state_handler = callback
