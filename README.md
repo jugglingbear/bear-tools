@@ -18,5 +18,5 @@ pip3 install bear-tools
 
 | Subpcakage                                  | Description |
 |------------------------------------------------------|-------------|
-| [FSM](src/bear_tools/fsm/README.md) | A generic Finite State Machine implementation |
-| [Lumberjack](src/bear_tools/lumberjack/README.md) | Simple alternative to Python's built-in `logging` package with a few useful bells and whistles |
+| [FSM](https://github.com/jugglingbear/bear-tools/blob/main/src/bear_tools/fsm/README.md) | A generic Finite State Machine implementation |
+| [Lumberjack](https://github.com/jugglingbear/bear-tools/blob/main/src/bear_tools/lumberjack/README.md) | Simple alternative to Python's built-in `logging` package with a few useful bells and whistles |
