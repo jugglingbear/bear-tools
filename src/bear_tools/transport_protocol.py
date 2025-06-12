@@ -24,14 +24,15 @@
                 {variable}:xx:...  Current value of z (variable lengt)
 """
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-import sys
-from typing import Iterator, Literal, Type
 from types import NoneType
+from typing import Iterator, Literal, Type
 
 from ruamel import yaml
 from ruamel.yaml.error import YAMLError
+
 from bear_tools import lumberjack
 
 logger = lumberjack.Logger()
@@ -39,6 +40,7 @@ logger = lumberjack.Logger()
 
 @dataclass
 class Parameter:
+    """Parameter"""
     description: str
     length:      int | Literal['variable']
     value_type:  Type[int] | Type[str] | Type[bool] | None
@@ -47,6 +49,7 @@ class Parameter:
 
 @dataclass
 class Command:
+    """Command"""
     id:          int
     description: str
     parameters:  list[Parameter]
@@ -54,6 +57,7 @@ class Command:
 
 @dataclass
 class TransportProtocol:
+    """Transport Protocol"""
     schema: list[Command]
 
     def __get_next_length_value_object(self, tlv: Command, data: bytes) -> Iterator[Parameter | None]:
@@ -66,9 +70,9 @@ class TransportProtocol:
         :return: The LV object corresponding to the next chunk of data or None if there are any errors
         """
 
+        # pylint: disable=E0601,E0606
         def debug() -> None:
             logger.debug(f'length: {length}, value: {value_raw.hex(":")}, parameter.value_type: {parameter.value_type}')
-
 
         if len(data) < 1:
             logger.error('Error: There is no data')
@@ -79,6 +83,7 @@ class TransportProtocol:
 
             # Extract ordered values for each parameter in the TLV command
             for parameter in tlv.parameters:
+                
                 length: int = data[index]
                 value_raw: bytes = bytes(data[index + length_byte_count: index + length_byte_count + length])
                 index += length_byte_count + length
