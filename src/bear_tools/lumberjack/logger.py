@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import datetime
 import inspect
 import io
-from pathlib import Path
 import sys
 import time
+from pathlib import Path
 from typing import Callable, TextIO
 
-from bear_tools.lumberjack import CallbackConfig, LogLevel, print_color, PrintColor
+from bear_tools.lumberjack import CallbackConfig, LogLevel, PrintColor, print_color
 
 
 class Logger:
@@ -251,7 +252,7 @@ class Logger:
             path: Path | TextIO
             for path in self.output_paths:
                 if isinstance(path, Path):
-                    with open(path, 'a') as _f:
+                    with open(path, 'a', encoding='utf-8') as _f:
                         _f.write(f'{full_msg}\n')
                 elif isinstance(path, io.TextIOWrapper):
                     print_color(full_msg, log_color, path)
@@ -259,7 +260,7 @@ class Logger:
             # Send logs to globally-configured files
             if not self.ignore_global_paths:
                 for path in Logger.global_output_paths:
-                    with open(path, 'a') as _f:
+                    with open(path, 'a', encoding='utf-8') as _f:
                         _f.write(f'{full_msg}\n')
 
             # Send logs to any registered subscribers
