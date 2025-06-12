@@ -3,9 +3,9 @@ from __future__ import annotations
 import datetime
 import inspect
 import io
-import sys
 import time
 from pathlib import Path
+from sys import stdout
 from typing import Callable, TextIO
 
 from bear_tools.lumberjack import CallbackConfig, LogLevel, PrintColor, print_color
@@ -16,12 +16,12 @@ class Logger:
     The main logging class
     """
 
-    global_output_paths: list[Path] = []  # All Logger instances everywhere will log to these paths (optional)
+    global_outputs: list[Path] = []  # All Logger instances everywhere will log to these paths (optional)
 
     def __init__(
         self,
         log_level: LogLevel = LogLevel.INFO,
-        output_paths: list[Path | TextIO] | None = None,
+        outputs: list[Path | TextIO | io.TextIOBase | list[str]] | None = None,
         default_color: PrintColor = PrintColor.COLOR_OFF,
         signature: str | None = None,
         add_caller: bool = True,
@@ -32,7 +32,7 @@ class Logger:
         Initializer
 
         :param log_level: The lowest level at which to log messages
-        :param output_paths: Where to send logs (e.g. files, sys.stdout, ...)
+        :param outputs: Where to send logs (e.g. files, sys.stdout, ...)
         :param default_color: Default logging color for Logger.info (see lumberjack.PrintColor)
         :param signature: If set, this is prepended to all log messages
         :param add_caller: If True, add caller information (i.e FILE:LINE); otherwise, do not
@@ -49,8 +49,8 @@ class Logger:
 
         self.__callbacks: dict[LogLevel, list[CallbackConfig]] = {}
 
-        # Linting anomaly: The linter thinks that sys.stdout is a typing.TextIO but it is actually an io.TextIOWrapper
-        self.output_paths: list[Path | TextIO] = output_paths if isinstance(output_paths, list) else [sys.stdout]
+        self.__outputs: list[Path | TextIO | io.TextIOBase | list[str]]
+        self.__outputs = outputs if isinstance(outputs, list) else [stdout]
 
 
     @property
@@ -75,6 +75,40 @@ class Logger:
         else:
             self.warning(f'Unrecognized level [{level}]. Defaulting to INFO')
             self.__log_level = LogLevel.INFO
+
+
+    @property
+    def outputs(self) -> list[Path | TextIO | io.TextIOBase | list[str]]:
+        """
+        Get the list of configured logging outputs
+
+        Type Notes:
+            TextIO        -> sys.stdout
+            io.TextIOBase -> formal buffer --> io.StringIO()
+            list[str]     -> informal buffer
+        """
+
+        return self.__outputs.copy()
+
+
+    @outputs.setter
+    def outputs(self, outputs: list[Path | TextIO | io.TextIOBase | list[str]]) -> None:
+        """
+        Set the list of configured logging outputs
+
+        :param output: Where to send logging to
+        """
+
+        for output in outputs:
+            if isinstance(output, (Path, TextIO, io.TextIOBase)):
+                continue
+            if isinstance(output, list) and all(isinstance(item, str) for item in output):
+                continue
+            raise TypeError(
+                f'Expected output: Path | TextIO | io.TextIOBase | list[str]. Actual: {output} (type: {type(output)})'
+            )
+
+        self.__outputs = outputs
 
 
     def banner(self, text: str, color: PrintColor | str = PrintColor.WHITE, symbol: str = '=') -> None:
@@ -191,9 +225,8 @@ class Logger:
         callbacks: list[CallbackConfig] | None = self.__callbacks.get(log_level)
         if callbacks is None:
             return False
-        else:
-            self.__callbacks[log_level] = [_config for _config in callbacks if _config.callback != callback]
-            return True
+        self.__callbacks[log_level] = [_config for _config in callbacks if _config.callback != callback]
+        return True
 
 
     def __log(self, level: LogLevel, text: str, color: PrintColor | str | None = None) -> None:
@@ -249,17 +282,28 @@ class Logger:
             log_color: PrintColor | str = color or self.default_color or PrintColor.COLOR_OFF
 
             # Send logs to configured files/streams/etc
-            path: Path | TextIO
-            for path in self.output_paths:
+            path: Path | TextIO | io.TextIOBase | list[str]
+            for path in self.outputs:
+                # Log to a file
                 if isinstance(path, Path):
                     with open(path, 'a', encoding='utf-8') as _f:
                         _f.write(f'{full_msg}\n')
-                elif isinstance(path, io.TextIOWrapper):
+
+                # Log to stdout
+                elif isinstance(path, TextIO):
                     print_color(full_msg, log_color, path)
+
+                # Log to a StringIO buffer
+                elif isinstance(path, io.TextIOBase):
+                    path.write(full_msg)
+
+                # Log to a reference variable
+                elif isinstance(path, list):
+                    path.append(full_msg)
 
             # Send logs to globally-configured files
             if not self.ignore_global_paths:
-                for path in Logger.global_output_paths:
+                for path in Logger.global_outputs:
                     with open(path, 'a', encoding='utf-8') as _f:
                         _f.write(f'{full_msg}\n')
 

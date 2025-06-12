@@ -47,12 +47,16 @@ import sys
 
 from bear_tools.lumberjack import Logger, LogLevel
 
+buffer1: list[str] = []
+buffer2: io.TextIOBase = io.StringIO()
 logger = Logger(
     log_level=LogLevel.DEBUG,
-    output_paths=[
+    outputs=[
         Path('logs1.txt'),  # Logs saved to logs1.txt
         Path('logs2.txt'),  # Logs saved to logs2.txt
-        sys.stdout          # Logs sent to stdout (optional)
+        sys.stdout,         # Logs sent to stdout (optional)
+        buffer1,            # Logs saved to informal buffer
+        buffer2,            # Logs saved to formal buffer
     ]
 )
 
