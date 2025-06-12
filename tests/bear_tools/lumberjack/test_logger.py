@@ -279,14 +279,21 @@ def test_Logger_set_outputs_stddout_multi_line() -> None:
         for text in test_strings:
             logger.info(text)
         buffer.flush()
-        content: str = buffer.getvalue()
+        lines: list[str] = buffer.getvalue().splitlines()
 
         # Verify that all test strings are found in the buffer in the same order given in test_strings
         index: int = 0
-        for item in test_strings:
-            index = content.find(item, index)
-            assert index != -1, f'Failed to find {test_strings} in buffer: {content}'
-            index += len(item)
+        for line in lines:
+            if test_strings[index] in line:
+                index += 1
+                if index == len(test_strings):
+                    return
+        remaining = test_strings[index:]
+        raise AssertionError(
+            f"The following expected log entries were not found in order:\n"
+            f"{remaining}\n\n"
+            f"Log contents:\n{buffer.getvalue()}"
+        )
     finally:
         sys.stdout = original_stdout
 
