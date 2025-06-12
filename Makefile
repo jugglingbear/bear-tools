@@ -13,7 +13,7 @@ coverage: src/bear_tools  ## Analyze test code coverage
 .PHONY: clean
 clean:  ## Remove generated site files and intermediate build artifacts
 	@echo '🧼 Tidying up'
-	rm -rf site
+	rm -rf site .mypy_cache .pytest_cache .coverage
 
 .PHONY: docs-dev
 docs-dev: clean ## Build and serve the docs website locally as http://localhost:8000
@@ -24,6 +24,8 @@ docs-dev: clean ## Build and serve the docs website locally as http://localhost:
 
 .PHONY: lint  
 lint: src/bear_tools  ## Run flake8 and mypy on the src/bear_tools package
+	@echo '🫣 Running Ruff'
+	poetry run ruff check . --output-format=concise
 	@echo '🧹 Running flake8'
 	poetry run flake8 src/bear_tools
 	@echo '🔍 Running mypy'
