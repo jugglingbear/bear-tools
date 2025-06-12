@@ -295,7 +295,7 @@ class Logger:
 
                 # Log to a StringIO buffer
                 elif isinstance(path, io.TextIOBase):
-                    path.write(full_msg)
+                    path.write(f'{full_msg}\n')
 
                 # Log to a reference variable
                 elif isinstance(path, list):

@@ -258,6 +258,39 @@ def test_Logger_set_outputs_stddout() -> None:
         sys.stdout = original_stdout
 
 
+def test_Logger_set_outputs_stddout_multi_line() -> None:
+    """
+    Verify that outputs can be set with a stdout and that newlines are logged when printing multiple lines
+    """
+
+    test_strings: list[str] = [
+        'This is the song that never ends',
+        'it goees on and on my friends.',
+        'Some people started singing, not knowing what it was',
+        'and now they keep on singing it because...'
+    ]
+    original_stdout = sys.stdout
+    buffer = io.StringIO()
+
+    try:
+        sys.stdout = buffer
+        logger = Logger()
+        logger.outputs = [sys.stdout]
+        for text in test_strings:
+            logger.info(text)
+        buffer.flush()
+        content: str = buffer.getvalue()
+
+        # Verify that all test strings are found in the buffer in the same order given in test_strings
+        index: int = 0
+        for item in test_strings:
+            index = content.find(item, index)
+            assert index != -1, f'Failed to find {test_strings} in buffer: {content}'
+            index += len(item)
+    finally:
+        sys.stdout = original_stdout
+
+
 def test_Logger_set_outputs_variable() -> None:
     """
     Verify that outputs can be set with a reference variable
