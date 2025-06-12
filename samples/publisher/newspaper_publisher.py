@@ -1,8 +1,8 @@
-from datetime import datetime
 import time
+from datetime import datetime
 
-from bear_tools.publisher import Publisher
 from bear_tools import lumberjack
+from bear_tools.publisher import Publisher
 
 green = lumberjack.PrintColor.GREEN
 logger = lumberjack.Logger()
@@ -37,4 +37,3 @@ class NewspaperPublisher(Publisher):
             logger.info(f'[{self.name}] Sending newspaper to all customers: {newspaper}', color=green)
             self.notify_listeners(newspaper)
             time.sleep(1.0)  # Do not send multiple notifications per second
-

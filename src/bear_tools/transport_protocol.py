@@ -83,7 +83,7 @@ class TransportProtocol:
 
             # Extract ordered values for each parameter in the TLV command
             for parameter in tlv.parameters:
-                
+
                 length: int = data[index]
                 value_raw: bytes = bytes(data[index + length_byte_count: index + length_byte_count + length])
                 index += length_byte_count + length
@@ -110,7 +110,7 @@ class TransportProtocol:
                         value_type=parameter.value_type,
                         value=int.from_bytes(value_raw, 'big')
                     )
-                elif parameter.value_type == str:
+                elif parameter.value_type is str:
                     logger.warning('>>>>> Point 3')
                     yield Parameter(
                         description=parameter.description,

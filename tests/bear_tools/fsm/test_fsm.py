@@ -10,15 +10,17 @@ from bear_tools.fsm import FSM
 
 class State(Enum):
     """Test states"""
-    START      = 1
+
+    START = 1
     PROCESSING = 2
-    COMPLETED  = 3
-    FINISHED   = 4
+    COMPLETED = 3
+    FINISHED = 4
 
 
 class Input(Enum):
     """Test inputs"""
-    PROCESS  = 1
+
+    PROCESS = 1
     COMPLETE = 2
 
 
@@ -41,9 +43,9 @@ def test_register_input_callback() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.PROCESS): State.PROCESSING,
+            (State.START, Input.PROCESS): State.PROCESSING,
             (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
-        }
+        },
     )
 
     fsm.register_input_callback(Input.PROCESS, input_a_callback)
@@ -89,10 +91,10 @@ def test_transition_valid() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.PROCESS):  State.PROCESSING,
+            (State.START, Input.PROCESS): State.PROCESSING,
             (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
-            (State.COMPLETED,  None):           State.FINISHED,
-        }
+            (State.COMPLETED, None): State.FINISHED,
+        },
     )
     next_state: State = fsm.transition(Input.PROCESS)
     assert next_state == State.PROCESSING
@@ -108,9 +110,9 @@ def test_transition_invalid() -> None:
     fsm = FSM[State, Input](
         State.START,
         {
-            (State.START,      Input.PROCESS): State.PROCESSING,
+            (State.START, Input.PROCESS): State.PROCESSING,
             (State.PROCESSING, Input.COMPLETE): State.COMPLETED,
-        }
+        },
     )
 
     with pytest.raises(ValueError):

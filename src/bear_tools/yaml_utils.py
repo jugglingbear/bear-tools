@@ -7,10 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from ruamel import yaml
-from ruamel.yaml.error import YAMLError
 from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.error import YAMLError
 
 from bear_tools import lumberjack
+
 logger = lumberjack.Logger()
 
 
@@ -61,7 +62,7 @@ def load(path: Path) -> CommentedMap | None:
 
     y = yaml.YAML()
     try:
-        with open(path) as _f:
+        with open(path, encoding='utf-8') as _f:
             data: CommentedMap = y.load(_f)
     except IOError as error:
         logger.error(f'Failed to load "{path}". Error: "{error}"')

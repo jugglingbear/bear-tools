@@ -1,7 +1,7 @@
 from typing import Any
 
-from bear_tools.publisher import Listener
 from bear_tools import lumberjack
+from bear_tools.publisher import Listener
 
 cyan = lumberjack.PrintColor.CYAN
 logger = lumberjack.Logger()
@@ -39,4 +39,3 @@ class NewspaperCustomer(Listener):
         """
 
         logger.info(f'[{self.name}] Received newspaper: {event}', color=cyan)
-

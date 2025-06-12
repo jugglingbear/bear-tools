@@ -4,14 +4,16 @@ Example of a newspaper system that uses the publisher subpackage
 
 import time
 
-from bear_tools import lumberjack
-from newspaper_publisher import NewspaperPublisher
 from newspaper_customer import NewspaperCustomer
+from newspaper_publisher import NewspaperPublisher
+
+from bear_tools import lumberjack
 
 logger = lumberjack.Logger()
 
 
-def main():
+def main() -> None:
+    """Main entry point"""
     publish_frequency: float = 5.0  # How often will the publisher publish something
     publisher = NewspaperPublisher('The Clock Times', publish_frequency)
     customers: list[NewspaperCustomer] = [
@@ -34,4 +36,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

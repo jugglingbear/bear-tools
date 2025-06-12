@@ -8,7 +8,7 @@ import pytest
 
 from bear_tools.lumberjack import PrintColor, get_color_str, print_color
 
-test_messages: list[Any] = ['test', 123, 456.7, ['cats'], {'key': 890}]
+test_messages: list[Any] = ["test", 123, 456.7, ["cats"], {"key": 890}]
 
 
 def test_get_color_str() -> None:
@@ -27,11 +27,11 @@ def test_PrintColor() -> None:
 
 def test_print_color() -> None:
     """Test the print_color API"""
-    # def print_color(message: str, color: str, path: TextIO = sys.stdout, end: str ='\n') -> None:
-    temp = tempfile.TemporaryFile('w')
-    for _message in test_messages:
-        for _color in PrintColor:
-            try:
-                print_color(message=_message, color=_color)
-            except Exception:
-                pytest.fail('Exception occurred during call to print_color')
+    with tempfile.TemporaryFile('w') as temp_file:
+        for _message in test_messages:
+            for _color in PrintColor:
+                try:
+                    print_color(message=_message, color=_color)
+                    print_color(message=_message, color=_color, path=temp_file)
+                except Exception:
+                    pytest.fail("Exception occurred during call to print_color")
