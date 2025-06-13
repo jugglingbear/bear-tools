@@ -290,7 +290,7 @@ class Logger:
                         _f.write(f'{full_msg}\n')
 
                 # Log to stdout
-                elif isinstance(path, TextIO):
+                elif isinstance(path, io.TextIOWrapper):
                     print_color(full_msg, log_color, path)
 
                 # Log to a StringIO buffer
