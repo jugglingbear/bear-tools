@@ -1,3 +1,5 @@
+# pylint: disable=R0902,R0903,R0913,R0917
+
 from __future__ import annotations
 
 import datetime
@@ -27,7 +29,7 @@ class Logger:
         add_caller: bool = True,
         add_timestamps: bool = True,
         ignore_global_paths: bool = False
-    ):
+    ) -> None:
         """
         Initializer
 
