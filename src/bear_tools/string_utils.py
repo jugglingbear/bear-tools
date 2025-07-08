@@ -6,7 +6,7 @@ from bear_tools.lumberjack import Logger, LogLevel
 logger = Logger(LogLevel.INFO)
 
 
-def bytearray2str(data: bytearray | str | None, simple_hex: bool = False) -> str | None:
+def bytearray2str(data: bytearray | bytes | str | None, simple_hex: bool = False) -> str | None:
     """
     Convert a bytearray into a human-readable equivalent hex string
 
