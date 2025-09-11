@@ -73,28 +73,39 @@ class TestEnumMixin:
         assert actual_names == expected_names
         assert isinstance(actual_names, list)
 
-    def test_members_returns_correct_values(self) -> None:
-        """Test that members returns all enum *values* in declaration order."""
-        expected_values = [1, "two", 3.0, [4], {"five": 5}]
-        actual_values = TestEnum.members()
-
-        assert actual_values == expected_values
-        assert isinstance(actual_values, list)
+    def test_members_returns_members_in_order(self) -> None:
+        """members returns enum instances in definition order."""
+        actual_members = TestEnum.members()
+        assert actual_members == [
+            TestEnum.FIRST,
+            TestEnum.SECOND,
+            TestEnum.THIRD,
+            TestEnum.FOURTH,
+            TestEnum.FIFTH,
+        ]
+        assert isinstance(actual_members, list)
+        assert all(isinstance(m, TestEnum) for m in actual_members)
 
     def test_members_empty_enum(self) -> None:
         """Test members with empty enum."""
-        actual_values = EmptyEnum.members()
-
-        assert actual_values == []
-        assert isinstance(actual_values, list)
+        assert EmptyEnum.members() == []
 
     def test_members_single_value_enum(self) -> None:
         """Test members with single value enum."""
-        expected_values = ["only_value"]
-        actual_values = SingleValueEnum.members()
+        assert SingleValueEnum.members() == [SingleValueEnum.ONLY]
 
-        assert actual_values == expected_values
-        assert isinstance(actual_values, list)
+    def test_values_returns_values_in_order(self) -> None:
+        """values returns raw values in definition order."""
+        expected_values = [1, "two", 3.0, [4], {"five": 5}]
+        assert TestEnum.values() == expected_values
+
+    def test_values_empty_enum(self) -> None:
+        """Test values with empty enum."""
+        assert EmptyEnum.values() == []
+
+    def test_values_single_value_enum(self) -> None:
+        """Test values with single value enum."""
+        assert SingleValueEnum.values() == ["only_value"]
 
     def test_contains_value_with_existing_values(self) -> None:
         """Test contains_value returns True for existing values."""
@@ -176,38 +187,20 @@ class TestEnumMixin:
         assert EmptyEnum.get_name("anything") is None
         assert EmptyEnum.get_name(None) is None
 
-    def test_get_name_return_type(self) -> None:
-        """Test that get_name returns the correct type."""
-        name = TestEnum.get_name(1)
-        assert isinstance(name, str)
-        assert name is not None
-
-        none_name = TestEnum.get_name("invalid")
-        assert none_name is None
-
     def test_hash_method(self) -> None:
-        """Test that __hash__ method works correctly."""
+        """Test hashing behavior is stable and consistent for members."""
         first_item = TestEnum.FIRST
         second_item = TestEnum.SECOND
 
-        # Test that hash is based on name
-        assert hash(first_item) == hash("FIRST")
-        assert hash(second_item) == hash("SECOND")
+        # Stable and consistent hashing for same member
+        assert hash(first_item) == hash(TestEnum.FIRST)
 
-        # Test that different enum members have different hashes
+        # Different members typically hash differently
         assert hash(first_item) != hash(second_item)
 
-        # Test that same enum member has consistent hash
+    def test_hash_method_with_same_member_identity(self) -> None:
+        """Same member should hash identically each time."""
         assert hash(TestEnum.FIRST) == hash(TestEnum.FIRST)
-
-    def test_hash_method_with_same_name_different_values(self) -> None:
-        """Test hash consistency for enum members."""
-        # Create two references to the same enum member
-        first_ref1 = TestEnum.FIRST
-        first_ref2 = TestEnum.FIRST
-
-        assert hash(first_ref1) == hash(first_ref2)
-        assert first_ref1 is first_ref2  # Should be the same object
 
     def test_lt_method_with_numeric_values(self) -> None:
         """Test __lt__ method with numeric enum values."""
@@ -216,27 +209,30 @@ class TestEnumMixin:
         assert NumericEnum.LOW < NumericEnum.HIGH
 
         # Test reflexivity
-        assert not NumericEnum.LOW < NumericEnum.LOW
-        assert not NumericEnum.MEDIUM < NumericEnum.MEDIUM
-        assert not NumericEnum.HIGH < NumericEnum.HIGH
+        assert not (NumericEnum.LOW < NumericEnum.LOW)
+        assert not (NumericEnum.MEDIUM < NumericEnum.MEDIUM)
+        assert not (NumericEnum.HIGH < NumericEnum.HIGH)
 
     def test_lt_method_with_different_types(self) -> None:
-        """Test __lt__ method with different enum types."""
-        # Should return False when comparing with different enum type
-        assert not TestEnum.FIRST < NumericEnum.LOW
-        assert not NumericEnum.LOW < TestEnum.FIRST
+        """Cross-enum comparisons should raise TypeError via NotImplemented fallback."""
+        with pytest.raises(TypeError):
+            _ = TestEnum.FIRST < NumericEnum.LOW
+        with pytest.raises(TypeError):
+            _ = NumericEnum.LOW < TestEnum.FIRST
 
     def test_lt_method_with_non_enum_types(self) -> None:
-        """Test __lt__ method with non-enum types."""
-        # Should return False when comparing with non-enum types
-        assert not NumericEnum.LOW < 5
-        assert not NumericEnum.LOW < "string"
-        assert not NumericEnum.LOW < None
-        assert not NumericEnum.LOW < [1, 2, 3]
+        """Comparisons with non-enum types should raise TypeError."""
+        with pytest.raises(TypeError):
+            _ = NumericEnum.LOW < 5
+        with pytest.raises(TypeError):
+            _ = NumericEnum.LOW < "string"
+        with pytest.raises(TypeError):
+            _ = NumericEnum.LOW < None
+        with pytest.raises(TypeError):
+            _ = NumericEnum.LOW < [1, 2, 3]
 
     def test_lt_method_with_non_comparable_values(self) -> None:
-        """Test __lt__ method with non-comparable enum values."""
-        # When enum values are not comparable, Python raises TypeError from `<`
+        """When enum values are not comparable, Python raises TypeError from `<`."""
         with pytest.raises(TypeError):
             # pylint: disable=W0104
             TestEnum.FIRST < TestEnum.SECOND  # type: ignore[unused-ignore]
@@ -256,7 +252,7 @@ class TestEnumMixin:
         assert TestEnum.FIRST is TestEnum.FIRST
         assert TestEnum.FIRST is not TestEnum.SECOND  # type: ignore[comparison-overlap]
 
-        # Test that creating enum with same value twice refers to same object
+        # Creating enum with same value twice refers to same object
         first_ref1 = TestEnum(1)
         first_ref2 = TestEnum(1)
         assert first_ref1 is first_ref2
@@ -281,9 +277,14 @@ class TestEnumMixin:
         assert isinstance(names, list)
         assert all(isinstance(name, str) for name in names)
 
-        # members should return list of values
-        values = TestEnum.members()
-        assert isinstance(values, list)
+        # members should return list of members (instances)
+        members = TestEnum.members()
+        assert isinstance(members, list)
+        assert all(isinstance(m, TestEnum) for m in members)
+
+        # values should return list of raw values
+        vals = TestEnum.values()
+        assert isinstance(vals, list)
 
         # contains_value should return bool
         result = TestEnum.contains_value(1)
@@ -316,14 +317,14 @@ class TestEnumMixin:
         """Test methods work with different enum classes."""
         # Ensure methods don't crash with different enum types
         names = enum_class.names()
-        values = enum_class.members()
+        vals = enum_class.values()
 
         assert isinstance(names, list)
-        assert isinstance(values, list)
-        assert len(names) == len(values)
+        assert isinstance(vals, list)
+        assert len(names) == len(vals)
 
         if names:  # If enum has members
-            first_value = values[0]
+            first_value = vals[0]
             assert enum_class.contains_value(first_value) is True
             assert enum_class.get_member(first_value) is not None
             assert enum_class.get_name(first_value) is not None
