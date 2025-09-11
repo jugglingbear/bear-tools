@@ -6,14 +6,16 @@ from __future__ import annotations
 
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
-from bear_tools import lumberjack
 from ruamel import yaml
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.error import YAMLError
 
+from bear_tools import lumberjack
+
 logger = lumberjack.Logger()
+T = TypeVar('T')
 
 
 def get_nested(data: CommentedMap, *keys: str) -> Any | None:
@@ -60,7 +62,7 @@ def get_string(data: yaml.YAML) -> str:
     return sio.getvalue()
 
 
-def load(path: Path) -> CommentedMap | None:
+def load(path: Path, default: T | None = None) -> CommentedMap | None:
     """
     Load a YAML file
 
@@ -72,6 +74,8 @@ def load(path: Path) -> CommentedMap | None:
     try:
         with open(path, encoding='utf-8') as _f:
             data: CommentedMap = y.load(_f)
+            if data is None:
+                return default
     except IOError as error:
         logger.error(f'Failed to load "{path}". Error: "{error}"')
         return None

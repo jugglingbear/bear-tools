@@ -49,49 +49,49 @@ class NumericEnum(EnumMixin, Enum):
 class TestEnumMixin:
     """Comprehensive test suite for EnumMixin class."""
 
-    def test_all_names_returns_correct_names(self) -> None:
-        """Test that all_names returns all enum member names."""
+    def test_names_returns_correct_names(self) -> None:
+        """Test that names returns all enum member names."""
         expected_names = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH"]
-        actual_names = TestEnum.all_names()
+        actual_names = TestEnum.names()
 
         assert actual_names == expected_names
         assert isinstance(actual_names, list)
         assert all(isinstance(name, str) for name in actual_names)
 
-    def test_all_names_empty_enum(self) -> None:
-        """Test all_names with empty enum."""
-        actual_names = EmptyEnum.all_names()
+    def test_names_empty_enum(self) -> None:
+        """Test names with empty enum."""
+        actual_names = EmptyEnum.names()
 
         assert actual_names == []
         assert isinstance(actual_names, list)
 
-    def test_all_names_single_value_enum(self) -> None:
-        """Test all_names with single value enum."""
+    def test_names_single_value_enum(self) -> None:
+        """Test names with single value enum."""
         expected_names = ["ONLY"]
-        actual_names = SingleValueEnum.all_names()
+        actual_names = SingleValueEnum.names()
 
         assert actual_names == expected_names
         assert isinstance(actual_names, list)
 
-    def test_all_values_returns_correct_values(self) -> None:
-        """Test that all_values returns all enum member values."""
+    def test_members_returns_correct_values(self) -> None:
+        """Test that members returns all enum *values* in declaration order."""
         expected_values = [1, "two", 3.0, [4], {"five": 5}]
-        actual_values = TestEnum.all_values()
+        actual_values = TestEnum.members()
 
         assert actual_values == expected_values
         assert isinstance(actual_values, list)
 
-    def test_all_values_empty_enum(self) -> None:
-        """Test all_values with empty enum."""
-        actual_values = EmptyEnum.all_values()
+    def test_members_empty_enum(self) -> None:
+        """Test members with empty enum."""
+        actual_values = EmptyEnum.members()
 
         assert actual_values == []
         assert isinstance(actual_values, list)
 
-    def test_all_values_single_value_enum(self) -> None:
-        """Test all_values with single value enum."""
+    def test_members_single_value_enum(self) -> None:
+        """Test members with single value enum."""
         expected_values = ["only_value"]
-        actual_values = SingleValueEnum.all_values()
+        actual_values = SingleValueEnum.members()
 
         assert actual_values == expected_values
         assert isinstance(actual_values, list)
@@ -118,41 +118,41 @@ class TestEnumMixin:
         assert EmptyEnum.contains_value(None) is False
 
     def test_contains_value_type_sensitivity(self) -> None:
-        """Test that contains_value is type-sensitive."""
+        """Test that contains_value is type-sensitive where Python equality dictates."""
         assert TestEnum.contains_value(1) is True
-        assert TestEnum.contains_value(1.0) is True  # Python treats 1 == 1.0 as True
+        assert TestEnum.contains_value(1.0) is True  # 1 == 1.0 in Python
         assert TestEnum.contains_value("1") is False
         assert TestEnum.contains_value(3.0) is True
-        assert TestEnum.contains_value(3) is True  # Python treats 3 == 3.0 as True
+        assert TestEnum.contains_value(3) is True  # 3 == 3.0 in Python
 
-    def test_get_item_with_valid_values(self) -> None:
-        """Test get_item returns correct enum members for valid values."""
-        assert TestEnum.get_item(1) == TestEnum.FIRST
-        assert TestEnum.get_item("two") == TestEnum.SECOND
-        assert TestEnum.get_item(3.0) == TestEnum.THIRD
-        assert TestEnum.get_item([4]) == TestEnum.FOURTH
-        assert TestEnum.get_item({"five": 5}) == TestEnum.FIFTH
+    def test_get_member_with_valid_values(self) -> None:
+        """Test get_member returns correct enum members for valid values."""
+        assert TestEnum.get_member(1) == TestEnum.FIRST
+        assert TestEnum.get_member("two") == TestEnum.SECOND
+        assert TestEnum.get_member(3.0) == TestEnum.THIRD
+        assert TestEnum.get_member([4]) == TestEnum.FOURTH
+        assert TestEnum.get_member({"five": 5}) == TestEnum.FIFTH
 
-    def test_get_item_with_invalid_values(self) -> None:
-        """Test get_item returns None for invalid values."""
-        assert TestEnum.get_item(999) is None
-        assert TestEnum.get_item("nonexistent") is None
-        assert TestEnum.get_item(None) is None
-        assert TestEnum.get_item([]) is None
-        assert TestEnum.get_item({}) is None
+    def test_get_member_with_invalid_values(self) -> None:
+        """Test get_member returns None for invalid values."""
+        assert TestEnum.get_member(999) is None
+        assert TestEnum.get_member("nonexistent") is None
+        assert TestEnum.get_member(None) is None
+        assert TestEnum.get_member([]) is None
+        assert TestEnum.get_member({}) is None
 
-    def test_get_item_empty_enum(self) -> None:
-        """Test get_item with empty enum."""
-        assert EmptyEnum.get_item("anything") is None
-        assert EmptyEnum.get_item(None) is None
+    def test_get_member_empty_enum(self) -> None:
+        """Test get_member with empty enum."""
+        assert EmptyEnum.get_member("anything") is None
+        assert EmptyEnum.get_member(None) is None
 
-    def test_get_item_return_type(self) -> None:
-        """Test that get_item returns the correct type."""
-        item = TestEnum.get_item(1)
+    def test_get_member_return_type(self) -> None:
+        """Test that get_member returns the correct type."""
+        item = TestEnum.get_member(1)
         assert isinstance(item, TestEnum)
         assert item is not None
 
-        none_item = TestEnum.get_item("invalid")
+        none_item = TestEnum.get_member("invalid")
         assert none_item is None
 
     def test_get_name_with_valid_values(self) -> None:
@@ -236,7 +236,7 @@ class TestEnumMixin:
 
     def test_lt_method_with_non_comparable_values(self) -> None:
         """Test __lt__ method with non-comparable enum values."""
-        # When enum values are not comparable, should raise TypeError
+        # When enum values are not comparable, Python raises TypeError from `<`
         with pytest.raises(TypeError):
             # pylint: disable=W0104
             TestEnum.FIRST < TestEnum.SECOND  # type: ignore[unused-ignore]
@@ -265,32 +265,32 @@ class TestEnumMixin:
     def test_edge_case_complex_data_types(self) -> None:
         """Test enum with complex data types as values."""
         # Test with list value
-        list_item = TestEnum.get_item([4])
+        list_item = TestEnum.get_member([4])
         assert list_item == TestEnum.FOURTH
         assert TestEnum.contains_value([4]) is True
 
         # Test with dict value
-        dict_item = TestEnum.get_item({"five": 5})
+        dict_item = TestEnum.get_member({"five": 5})
         assert dict_item == TestEnum.FIFTH
         assert TestEnum.contains_value({"five": 5}) is True
 
     def test_method_return_types_are_correct(self) -> None:
         """Test that all methods return the expected types."""
-        # all_names should return list[str]
-        names = TestEnum.all_names()
+        # names should return list[str]
+        names = TestEnum.names()
         assert isinstance(names, list)
         assert all(isinstance(name, str) for name in names)
 
-        # all_values should return list[Any]
-        values = TestEnum.all_values()
+        # members should return list of values
+        values = TestEnum.members()
         assert isinstance(values, list)
 
         # contains_value should return bool
         result = TestEnum.contains_value(1)
         assert isinstance(result, bool)
 
-        # get_item should return T | None
-        item = TestEnum.get_item(1)
+        # get_member should return T | None
+        item = TestEnum.get_member(1)
         assert item is None or isinstance(item, TestEnum)
 
         # get_name should return str | None
@@ -313,10 +313,10 @@ class TestEnumMixin:
 
     @pytest.mark.parametrize("enum_class", [TestEnum, SingleValueEnum])
     def test_all_methods_with_different_enum_classes(self, enum_class: Type[EnumMixin]) -> None:
-        """Test all methods work with different enum classes."""
-        # Test that methods don't crash with different enum types
-        names = enum_class.all_names()
-        values = enum_class.all_values()
+        """Test methods work with different enum classes."""
+        # Ensure methods don't crash with different enum types
+        names = enum_class.names()
+        values = enum_class.members()
 
         assert isinstance(names, list)
         assert isinstance(values, list)
@@ -325,13 +325,13 @@ class TestEnumMixin:
         if names:  # If enum has members
             first_value = values[0]
             assert enum_class.contains_value(first_value) is True
-            assert enum_class.get_item(first_value) is not None
+            assert enum_class.get_member(first_value) is not None
             assert enum_class.get_name(first_value) is not None
 
     def test_type_var_bound_constraint(self) -> None:
         """Test that type variable T is properly bound to EnumMixin."""
         # This is more of a static type checking test, but we can verify runtime behavior
-        item = TestEnum.get_item(1)
+        item = TestEnum.get_member(1)
         if item is not None:
             assert isinstance(item, EnumMixin)
             assert isinstance(item, TestEnum)

@@ -10,38 +10,27 @@ class EnumMixin(Enum):
     """
 
     @classmethod
-    def all_names(cls: Type[T]) -> list[str]:
-        """
-        Get all variable names associated with the enum
-        """
-
+    def names(cls: Type[T]) -> list[str]:
+        """Get all variable names associated with the enum"""
         return [_enum.name for _enum in cls]
 
 
     @classmethod
-    def all_values(cls: Type[T]) -> list[Any]:
-        """
-        Get all values associated with the enum
-        """
-
+    def members(cls: Type[T]) -> list[T]:
+        """Get all enum members"""
         return [_enum.value for _enum in cls]
 
 
     @classmethod
     def contains_value(cls: Type[T], value: Any) -> bool:
-        """
-        Returns True if one of the enumerated values is equal to the given value; False otherwise
-        """
+        """Returns True if one of the enumerated values is equal to the given value; False otherwise"""
 
         return any(value == _enum.value for _enum in cls)
 
 
     @classmethod
-    def get_item(cls: Type[T], value: Any) -> T | None:
-        """
-        Get an item from the enumerated class
-        """
-
+    def get_member(cls: Type[T], value: Any) -> T | None:
+        """Get an item from the enumerated class"""
         try:
             return cls(value)
         except ValueError:
