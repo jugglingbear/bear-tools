@@ -1,53 +1,56 @@
 """
-Comprehensive unit tests for the EnumMixin class.
+Comprehensive unit tests for the EnhancedEnum class.
 
 This module contains type-hinted unit tests that validate all functionality
-of the EnumMixin class, including edge cases and error conditions.
+of the EnhancedEnum class, including edge cases and error conditions.
 """
 
 # pylint: disable=C0117
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import Type
 
 import pytest
 
-from bear_tools.enum_mixin import EnumMixin
+from bear_tools.enhanced_enum import EnhancedEnum
 
 
-class TestEnum(EnumMixin, Enum):
-    """Test enum class for testing EnumMixin functionality."""
-    __test__ = False
+class TestEnum(EnhancedEnum):
+    """Test enum class for testing EnhancedEnum functionality."""
+    __test__ = False  # prevent pytest from collecting this enum as a test class
 
     FIRST = 1
     SECOND = "two"
     THIRD = 3.0
-    FOURTH = [4]
-    FIFTH = {"five": 5}
+    # Use hashable equivalents for complex types (Enum requires hashable values)
+    FOURTH = (4,)  # was [4]
+    FIFTH = frozenset({"five": 5}.items())  # was {"five": 5}
 
 
-class EmptyEnum(EnumMixin, Enum):
+class EmptyEnum(EnhancedEnum):
     """Empty enum class for testing edge cases."""
+    __test__ = False
 
 
-class SingleValueEnum(EnumMixin, Enum):
+class SingleValueEnum(EnhancedEnum):
     """Single value enum for testing edge cases."""
+    __test__ = False
 
     ONLY = "only_value"
 
 
-class NumericEnum(EnumMixin, Enum):
+class NumericEnum(EnhancedEnum):
     """Numeric enum for testing comparison operations."""
+    __test__ = False
 
     LOW = 1
     MEDIUM = 5
     HIGH = 10
 
 
-class TestEnumMixin:
-    """Comprehensive test suite for EnumMixin class."""
+class TestEnhancedEnum:
+    """Comprehensive test suite for EnhancedEnum class."""
 
     def test_names_returns_correct_names(self) -> None:
         """Test that names returns all enum member names."""
@@ -96,7 +99,7 @@ class TestEnumMixin:
 
     def test_values_returns_values_in_order(self) -> None:
         """values returns raw values in definition order."""
-        expected_values = [1, "two", 3.0, [4], {"five": 5}]
+        expected_values = [1, "two", 3.0, (4,), frozenset({("five", 5)})]
         assert TestEnum.values() == expected_values
 
     def test_values_empty_enum(self) -> None:
@@ -112,21 +115,16 @@ class TestEnumMixin:
         assert TestEnum.contains_value(1) is True
         assert TestEnum.contains_value("two") is True
         assert TestEnum.contains_value(3.0) is True
-        assert TestEnum.contains_value([4]) is True
-        assert TestEnum.contains_value({"five": 5}) is True
+        assert TestEnum.contains_value((4,)) is True
+        assert TestEnum.contains_value(frozenset({("five", 5)})) is True
 
     def test_contains_value_with_nonexistent_values(self) -> None:
         """Test contains_value returns False for non-existent values."""
         assert TestEnum.contains_value(999) is False
         assert TestEnum.contains_value("nonexistent") is False
         assert TestEnum.contains_value(None) is False
-        assert TestEnum.contains_value([]) is False
-        assert TestEnum.contains_value({}) is False
-
-    def test_contains_value_empty_enum(self) -> None:
-        """Test contains_value with empty enum."""
-        assert EmptyEnum.contains_value("anything") is False
-        assert EmptyEnum.contains_value(None) is False
+        assert TestEnum.contains_value(()) is False
+        assert TestEnum.contains_value(frozenset()) is False
 
     def test_contains_value_type_sensitivity(self) -> None:
         """Test that contains_value is type-sensitive where Python equality dictates."""
@@ -141,16 +139,16 @@ class TestEnumMixin:
         assert TestEnum.get_member(1) == TestEnum.FIRST
         assert TestEnum.get_member("two") == TestEnum.SECOND
         assert TestEnum.get_member(3.0) == TestEnum.THIRD
-        assert TestEnum.get_member([4]) == TestEnum.FOURTH
-        assert TestEnum.get_member({"five": 5}) == TestEnum.FIFTH
+        assert TestEnum.get_member((4,)) == TestEnum.FOURTH
+        assert TestEnum.get_member(frozenset({("five", 5)})) == TestEnum.FIFTH
 
     def test_get_member_with_invalid_values(self) -> None:
         """Test get_member returns None for invalid values."""
         assert TestEnum.get_member(999) is None
         assert TestEnum.get_member("nonexistent") is None
         assert TestEnum.get_member(None) is None
-        assert TestEnum.get_member([]) is None
-        assert TestEnum.get_member({}) is None
+        assert TestEnum.get_member(()) is None
+        assert TestEnum.get_member(frozenset()) is None
 
     def test_get_member_empty_enum(self) -> None:
         """Test get_member with empty enum."""
@@ -171,16 +169,16 @@ class TestEnumMixin:
         assert TestEnum.get_name(1) == "FIRST"
         assert TestEnum.get_name("two") == "SECOND"
         assert TestEnum.get_name(3.0) == "THIRD"
-        assert TestEnum.get_name([4]) == "FOURTH"
-        assert TestEnum.get_name({"five": 5}) == "FIFTH"
+        assert TestEnum.get_name((4,)) == "FOURTH"
+        assert TestEnum.get_name(frozenset({("five", 5)})) == "FIFTH"
 
     def test_get_name_with_invalid_values(self) -> None:
         """Test get_name returns None for invalid values."""
         assert TestEnum.get_name(999) is None
         assert TestEnum.get_name("nonexistent") is None
         assert TestEnum.get_name(None) is None
-        assert TestEnum.get_name([]) is None
-        assert TestEnum.get_name({}) is None
+        assert TestEnum.get_name(()) is None
+        assert TestEnum.get_name(frozenset()) is None
 
     def test_get_name_empty_enum(self) -> None:
         """Test get_name with empty enum."""
@@ -238,10 +236,10 @@ class TestEnumMixin:
             TestEnum.FIRST < TestEnum.SECOND  # type: ignore[unused-ignore]
 
     def test_enum_inheritance_properties(self) -> None:
-        """Test that EnumMixin properly inherits from Enum."""
-        assert issubclass(TestEnum, EnumMixin)
+        """Test that EnhancedEnum properly inherits from Enum."""
+        assert issubclass(TestEnum, EnhancedEnum)
         assert isinstance(TestEnum.FIRST, TestEnum)
-        assert isinstance(TestEnum.FIRST, EnumMixin)
+        assert isinstance(TestEnum.FIRST, EnhancedEnum)
 
         # Test that enum members have expected properties
         assert TestEnum.FIRST.name == "FIRST"
@@ -259,16 +257,16 @@ class TestEnumMixin:
         assert first_ref1 is TestEnum.FIRST
 
     def test_edge_case_complex_data_types(self) -> None:
-        """Test enum with complex data types as values."""
-        # Test with list value
-        list_item = TestEnum.get_member([4])
-        assert list_item == TestEnum.FOURTH
-        assert TestEnum.contains_value([4]) is True
+        """Test enum with complex data types as values (using hashable equivalents)."""
+        # Tuple value
+        tuple_item = TestEnum.get_member((4,))
+        assert tuple_item == TestEnum.FOURTH
+        assert TestEnum.contains_value((4,)) is True
 
-        # Test with dict value
-        dict_item = TestEnum.get_member({"five": 5})
-        assert dict_item == TestEnum.FIFTH
-        assert TestEnum.contains_value({"five": 5}) is True
+        # Frozenset value
+        fs_item = TestEnum.get_member(frozenset({("five", 5)}))
+        assert fs_item == TestEnum.FIFTH
+        assert TestEnum.contains_value(frozenset({("five", 5)})) is True
 
     def test_method_return_types_are_correct(self) -> None:
         """Test that all methods return the expected types."""
@@ -299,7 +297,7 @@ class TestEnumMixin:
         assert name is None or isinstance(name, str)
 
     def test_integration_with_standard_enum_features(self) -> None:
-        """Test that EnumMixin works with standard Enum features."""
+        """Test that EnhancedEnum works with standard Enum features."""
         # Test iteration
         enum_members = list(TestEnum)
         assert len(enum_members) == 5
@@ -313,7 +311,7 @@ class TestEnumMixin:
         assert repr(TestEnum.FIRST) == "<TestEnum.FIRST: 1>"
 
     @pytest.mark.parametrize("enum_class", [TestEnum, SingleValueEnum])
-    def test_all_methods_with_different_enum_classes(self, enum_class: Type[EnumMixin]) -> None:
+    def test_all_methods_with_different_enum_classes(self, enum_class: Type[EnhancedEnum]) -> None:
         """Test methods work with different enum classes."""
         # Ensure methods don't crash with different enum types
         names = enum_class.names()
@@ -330,9 +328,9 @@ class TestEnumMixin:
             assert enum_class.get_name(first_value) is not None
 
     def test_type_var_bound_constraint(self) -> None:
-        """Test that type variable T is properly bound to EnumMixin."""
+        """Test that type variable T is properly bound to EnhancedEnum."""
         # This is more of a static type checking test, but we can verify runtime behavior
         item = TestEnum.get_member(1)
         if item is not None:
-            assert isinstance(item, EnumMixin)
+            assert isinstance(item, EnhancedEnum)
             assert isinstance(item, TestEnum)

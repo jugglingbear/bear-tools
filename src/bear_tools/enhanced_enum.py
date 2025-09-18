@@ -3,10 +3,10 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Type, TypeVar, cast
 
-T = TypeVar("T", bound="EnumMixin")
+T = TypeVar("T", bound="EnhancedEnum")
 
 
-class EnumMixin(Enum):
+class EnhancedEnum(Enum):
     """
     A mixin for enum.Enum subclasses that provides convenient, typed helpers.
 
@@ -63,4 +63,4 @@ class EnumMixin(Enum):
             return NotImplemented
 
 
-__all__ = ["EnumMixin"]
+__all__ = ["EnhancedEnum"]
