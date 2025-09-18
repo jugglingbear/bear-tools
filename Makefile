@@ -40,4 +40,4 @@ publish: src/bear_tools  ## Publish changes to PyPi
 .PHONY: test
 test: src/bear_tools  ## Run unit tests
 	@echo '🧪 Run unit tests'
-	poetry run pytest tests
+	poetry run pytest -v tests
