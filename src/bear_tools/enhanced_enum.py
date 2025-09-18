@@ -8,7 +8,7 @@ T = TypeVar("T", bound="EnhancedEnum")
 
 class EnhancedEnum(Enum):
     """
-    A mixin for enum.Enum subclasses that provides convenient, typed helpers.
+    An enhancement to the Enum class that adds useful convenience methods
 
     All collection-returning methods preserve member definition order.
     """

@@ -8,7 +8,7 @@ T = TypeVar("T", bound="EnhancedIntEnum")
 
 class EnhancedIntEnum(IntEnum):
     """
-    A mixin for enum.IntEnum subclasses that provides convenient, typed helpers.
+    An enhancement to the IntEnum class that adds useful convenience methods
 
     All collection-returning methods preserve member definition order.
     """
