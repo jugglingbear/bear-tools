@@ -86,3 +86,78 @@ def test_get_table_with_numbers_casts_to_string() -> None:
     )
     result: str = get_table(data)
     assert result == expected
+
+
+def test_get_table_handles_none_and_uneven_rows() -> None:
+    """Verify None becomes empty string and uneven rows are padded"""
+    data: list[list[str]] = [
+        ["head1", "head2", "head3"],
+        [None, "x"],                 # shorter row, None -> ""
+        ["a", "bb", "ccc"],
+    ]
+    expected: str = (
+        "| head1 | head2 | head3 |\n"
+        "|-------|-------|-------|\n"
+        "|       | x     |       |\n"
+        "| a     | bb    | ccc   |"
+    )
+    result: str = get_table(data)
+    assert result == expected
+
+
+def test_get_table_wide_emoji_alignment() -> None:
+    """
+    Verify proper alignment when cells contain wide emoji.
+    Emoji like 😀 have a display width of 2; header should dictate column width.
+    """
+    data: list[list[str]] = [
+        ["col1", "col2"],
+        ["😀", "x"],
+        ["a", "yy"],
+    ]
+    expected: str = (
+        "| col1 | col2 |\n"
+        "|------|------|\n"
+        "| 😀   | x    |\n"
+        "| a    | yy   |"
+    )
+    result: str = get_table(data)
+    assert result == expected
+
+
+def test_get_table_cjk_wide_chars_alignment() -> None:
+    """
+    Verify proper alignment with CJK wide characters (e.g., '漢' and '字' are width 2).
+    """
+    data: list[list[str]] = [
+        ["h", "c"],
+        ["漢", "字"],
+        ["ab", "z"],
+    ]
+    expected: str = (
+        "| h  | c  |\n"
+        "|----|----|\n"
+        "| 漢 | 字 |\n"
+        "| ab | z  |"
+    )
+    result: str = get_table(data)
+    assert result == expected
+
+
+def test_get_table_ansi_sequences_do_not_break_alignment() -> None:
+    """
+    Verify ANSI color codes don't affect column width calculations.
+    First column has visible width 3 ('red'), despite escape sequences.
+    """
+    red_ansi: str = "\x1b[31mred\x1b[0m"
+    data: list[list[str]] = [
+        ["h", "c"],
+        [red_ansi, "x"],
+    ]
+    expected: str = (
+        "| h   | c |\n"
+        "|-----|---|\n"
+        f"| {red_ansi} | x |"
+    )
+    result: str = get_table(data)
+    assert result == expected
