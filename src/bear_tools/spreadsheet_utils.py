@@ -5,7 +5,6 @@ Module designed to streamline certain common/repetitive spreadsheet-related acti
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 
 import pandas
@@ -24,14 +23,6 @@ from bear_tools import lumberjack
 
 logger = lumberjack.Logger()
 
-
-class ChartType(Enum):
-    """Supported chart types"""
-    PIE = "pie"
-    SCATTER = "scatter"
-    LINE = "line"
-    BAR = "bar"
-    COLUMN = "column"
 
 
 @dataclass

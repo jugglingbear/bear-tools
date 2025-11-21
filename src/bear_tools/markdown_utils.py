@@ -34,8 +34,9 @@ def _display_width(s: str) -> int:
     This covers common cases including emoji and CJK.
     """
     try:
-        from wcwidth import wcswidth  # type: ignore
-    except Exception:
+        # pylint: disable=C0415
+        from wcwidth import wcswidth
+    except Exception:  # pylint: disable=W0718
         # Fallback approximation using stdlib only
         import unicodedata as _ud
         width = 0

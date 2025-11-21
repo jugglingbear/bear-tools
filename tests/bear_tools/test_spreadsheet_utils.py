@@ -12,26 +12,9 @@ import pytest
 from openpyxl import load_workbook
 from openpyxl.chart import BarChart, LineChart, PieChart, ScatterChart
 from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
-from bear_tools.spreadsheet_utils import ChartConfig, ChartType, SpreadsheetBuilder, create_basic_spreadsheet
-
-
-class TestChartType:
-    """Test cases for ChartType enum."""
-
-    def test_chart_type_values(self) -> None:
-        """Test that ChartType enum has correct values."""
-        assert ChartType.PIE.value == "pie"
-        assert ChartType.SCATTER.value == "scatter"
-        assert ChartType.LINE.value == "line"
-        assert ChartType.BAR.value == "bar"
-        assert ChartType.COLUMN.value == "column"
-
-    def test_chart_type_members(self) -> None:
-        """Test that all expected ChartType members exist."""
-        expected_members = {"PIE", "SCATTER", "LINE", "BAR", "COLUMN"}
-        actual_members = {member.name for member in ChartType}
-        assert actual_members == expected_members
+from bear_tools.spreadsheet_utils import ChartConfig, SpreadsheetBuilder, create_basic_spreadsheet
 
 
 class TestChartConfig:
@@ -249,13 +232,15 @@ class TestSpreadsheetBuilder:
         assert chart.x_axis.title.text.rich.p[0].r[0].t == "X Values"  # type: ignore[union-attr]
         assert chart.y_axis.title.text.rich.p[0].r[0].t == "Y Values"  # type: ignore[union-attr]
 
-        # Verify marker configuration
+        # Verify marker configuration and series naming
         assert len(chart.series) == 1
         series = chart.series[0]
         assert series.marker is not None
         assert series.marker.symbol == 'circle'
         assert series.marker.size == 10
         assert series.smooth is False
+        assert series.title is not None
+        assert getattr(series.title, "v", None) == "Test Series"
 
     def test_add_scatter_chart_invalid_sheet(self, builder: SpreadsheetBuilder) -> None:
         """Test adding scatter chart to non-existent sheet raises error."""
@@ -382,6 +367,51 @@ class TestSpreadsheetBuilder:
         assert cell.font.color is not None  # Has color
         assert cell.font.underline == "single"
 
+
+    def test_add_hyperlink_uses_url_as_display_text_when_empty(
+        self,
+        builder: SpreadsheetBuilder,
+        temp_output_path: Path,
+    ) -> None:
+        """If no display_text is provided and the cell is empty, the URL is used as the text."""
+        data: list[list[int | float | str]] = [["Name", "URL"], ["Example", ""]]
+        builder.add_sheet("Links", data)
+        builder.add_hyperlink(
+            sheet_name="Links",
+            cell="B2",
+            url="https://example.com",
+        )
+        builder.save()
+
+        wb = load_workbook(temp_output_path)
+        ws = wb["Links"]
+        cell = ws["B2"]
+        assert cell.value == "https://example.com"
+        assert cell.hyperlink is not None
+        assert cell.hyperlink.target == "https://example.com"
+
+    def test_add_hyperlink_preserves_existing_cell_value_when_no_display_text(
+        self,
+        builder: SpreadsheetBuilder,
+        temp_output_path: Path,
+    ) -> None:
+        """If no display_text is provided and the cell has a value, that value is preserved."""
+        data: list[list[int | float | str]] = [["Name", "URL"], ["Example", "Existing Text"]]
+        builder.add_sheet("Links", data)
+        builder.add_hyperlink(
+            sheet_name="Links",
+            cell="B2",
+            url="https://example.com",
+        )
+        builder.save()
+
+        wb = load_workbook(temp_output_path)
+        ws = wb["Links"]
+        cell = ws["B2"]
+        assert cell.value == "Existing Text"
+        assert cell.hyperlink is not None
+        assert cell.hyperlink.target == "https://example.com"
+
     def test_add_hyperlink_invalid_sheet(self, builder: SpreadsheetBuilder) -> None:
         """Test adding hyperlink to non-existent sheet raises error."""
         with pytest.raises(ValueError, match="Sheet 'NonExistent' does not exist"):
@@ -432,6 +462,110 @@ class TestSpreadsheetBuilder:
         assert len(builder._sheets) == 1
         assert "Sales" in builder._sheets
 
+
+    def test_add_pie_chart_invalid_range(self, builder: SpreadsheetBuilder) -> None:
+        """Test that an invalid data range for pie chart raises a clear error."""
+        data: list[list[int | float | str]] = [
+            ["Product", "Sales"],
+            ["Widget", 100],
+            ["Gadget", 200],
+        ]
+        builder.add_sheet("Data", data)
+        with pytest.raises(ValueError, match="Invalid cell range: 1:2"):
+            builder.add_pie_chart(
+                sheet_name="Data",
+                data_range="1:2",
+                anchor_cell="D2",
+            )
+
+    def test_add_scatter_chart_invalid_range(self, builder: SpreadsheetBuilder) -> None:
+        """Test that an invalid x-range for scatter chart raises a clear error."""
+        data: list[list[int | float | str]] = [
+            ["X", "Y"],
+            [1, 10],
+            [2, 20],
+        ]
+        builder.add_sheet("Data", data)
+        with pytest.raises(ValueError, match="Invalid cell range: 1:2"):
+            builder.add_scatter_chart(
+                sheet_name="Data",
+                x_range="1:2",
+                y_range="B2:B3",
+                anchor_cell="D2",
+            )
+
+    def test_add_line_chart_invalid_data_range(self, builder: SpreadsheetBuilder) -> None:
+        """Test that an invalid data range for line chart raises a clear error."""
+        data: list[list[int | float | str]] = [
+            ["Month", "Sales"],
+            ["Jan", 100],
+            ["Feb", 200],
+        ]
+        builder.add_sheet("Data", data)
+        with pytest.raises(ValueError, match="Invalid cell range: 1:2"):
+            builder.add_line_chart(
+                sheet_name="Data",
+                data_range="1:2",
+                categories_range="A2:A3",
+                anchor_cell="D2",
+            )
+
+    def test_add_bar_chart_invalid_data_range(self, builder: SpreadsheetBuilder) -> None:
+        """Test that an invalid data range for bar chart raises a clear error."""
+        data: list[list[int | float | str]] = [
+            ["Category", "Value"],
+            ["A", 1],
+            ["B", 2],
+        ]
+        builder.add_sheet("Data", data)
+        with pytest.raises(ValueError, match="Invalid cell range: 1:2"):
+            builder.add_bar_chart(
+                sheet_name="Data",
+                data_range="1:2",
+                categories_range="A2:A3",
+                anchor_cell="D2",
+            )
+
+    def test_add_sheet_without_autofit_does_not_call_autofit(
+        self,
+        builder: SpreadsheetBuilder,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Test that add_sheet with autofit_columns=False does not call _autofit_columns."""
+        called = {"value": False}
+
+        def fake_autofit(ws: Worksheet) -> None:  # pylint: disable=W0613
+            called["value"] = True
+
+        monkeypatch.setattr(builder, "_autofit_columns", fake_autofit)
+
+        data: list[list[int | float | str]] = [
+            ["Header"],
+            ["Value"],
+        ]
+        builder.add_sheet("NoAutofit", data, autofit_columns=False)
+
+        assert "NoAutofit" in builder._sheets
+        assert called["value"] is False
+
+    def test_save_failure_returns_false(
+        self,
+        builder: SpreadsheetBuilder,
+        monkeypatch: pytest.MonkeyPatch,
+        temp_output_path: Path,  # pylint: disable=W0613
+    ) -> None:
+        """Test that save() returns False and logs when the underlying save fails."""
+        builder.add_sheet("Test", [["A", "B"], [1, 2]])
+
+        def fail_save(path: Path) -> None:  # pragma: no cover - behavior verified by return value
+            raise PermissionError("Denied")
+
+        monkeypatch.setattr(builder._workbook, "save", fail_save)
+
+        result = builder.save()
+
+        assert result is False
+
     def test_chart_config_applied_to_pie_chart(self, builder: SpreadsheetBuilder, temp_output_path: Path) -> None:
         """Test that ChartConfig is properly applied to pie charts."""
         data: list[list[int | float | str]] = [["Item", "Value"], ["A", 10], ["B", 20]]
@@ -446,8 +580,12 @@ class TestSpreadsheetBuilder:
 
         wb = load_workbook(temp_output_path)
         chart = wb["Data"]._charts[0]  # type: ignore[attr-defined]
-        assert chart.title.text.rich.p[0].r[0].t == "Test Title"  # type: ignore[union-attr]
-        # Note: Testing legend/data labels requires deeper inspection of chart properties
+        assert chart.title.text.rich.p[0].r[0].t == "Test Title"
+        # Legend should be disabled when show_legend is False
+        assert chart.legend is None
+        # Data labels should be enabled when show_data_labels is True
+        assert getattr(chart, "dataLabels", None) is not None
+        assert getattr(chart.dataLabels, "showVal", None) is True
 
     def test_multiple_charts_on_same_sheet(self, builder: SpreadsheetBuilder, temp_output_path: Path) -> None:
         """Test adding multiple charts to the same sheet."""
@@ -528,6 +666,28 @@ class TestCreateBasicSpreadsheet:
         assert ws["A1"].value == "Name"
         assert ws["B1"].value == "Age"
         assert ws["A2"].value == "Alice"
+
+
+    def test_create_basic_spreadsheet_without_header_row(self, temp_output_path: Path) -> None:
+        """Test creating a basic spreadsheet when the first row is not treated as a header."""
+        data: list[list[int | float | str]] = [
+            ["Name", "Age"],
+            ["Alice", 25],
+        ]
+
+        result = create_basic_spreadsheet(
+            data=data,
+            output=temp_output_path,
+            title="People",
+            first_row_is_header=False,
+        )
+
+        assert result is True
+        wb = load_workbook(temp_output_path)
+        ws = wb["People"]
+        # When first_row_is_header is False, header styling (bold/size) should not be applied specially.
+        assert ws["A1"].value == "Name"
+        assert ws["B1"].value == "Age"
 
     def test_create_basic_spreadsheet_default_title(self, temp_output_path: Path) -> None:
         """Test creating a basic spreadsheet with default title."""
