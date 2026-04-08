@@ -156,9 +156,9 @@ class TestCerealClientStr:
     """Test __str__ representation."""
 
     def test_str(self) -> None:
-        client = CerealClient(name='rtos', address='10.0.0.1', port=14441, output=[], start=False)
+        client = CerealClient(name='sensor', address='10.0.0.1', port=14441, output=[], start=False)
         result = str(client)
-        assert 'rtos' in result
+        assert 'sensor' in result
         assert '10.0.0.1' in result
         assert '14441' in result
         client._close_pipes()

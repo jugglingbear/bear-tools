@@ -163,3 +163,71 @@ class TestSerialClientBasic:
         client = SerialClient(name='test', silent=True)
         result = client.send_command('\x00\x01\x02', expect_output=False)
         assert result is None
+
+
+class TestProcessSerialData:
+    """Test __process_serial_data partial line buffering."""
+
+    def _make_manager(self) -> SerialManager:
+        return SerialManager(name='test', device_path='/dev/null', add_timestamps=False, start=False)
+
+    def _process(self, mgr: SerialManager, data: bytes) -> list[str]:
+        return list(mgr._SerialManager__process_serial_data(data))
+
+    def test_complete_line(self) -> None:
+        """A complete line (ending with \\n) is yielded immediately."""
+        mgr = self._make_manager()
+        result = self._process(mgr, b'hello world\n')
+        assert result == ['hello world\n']
+
+    def test_multiple_complete_lines(self) -> None:
+        """Multiple lines in one chunk are all yielded."""
+        mgr = self._make_manager()
+        result = self._process(mgr, b'line1\nline2\nline3\n')
+        assert result == ['line1\n', 'line2\n', 'line3\n']
+
+    def test_partial_line_buffered(self) -> None:
+        """A trailing fragment without \\n is not yielded."""
+        mgr = self._make_manager()
+        result = self._process(mgr, b'partial')
+        assert result == []
+
+    def test_partial_line_completed_on_next_call(self) -> None:
+        """A buffered fragment is prepended to the next chunk."""
+        mgr = self._make_manager()
+        result1 = self._process(mgr, b'hel')
+        assert result1 == []
+
+        result2 = self._process(mgr, b'lo world\n')
+        assert result2 == ['hello world\n']
+
+    def test_partial_across_three_calls(self) -> None:
+        """Fragments accumulate across multiple calls until a newline arrives."""
+        mgr = self._make_manager()
+        assert self._process(mgr, b'K:/co') == []
+        assert self._process(mgr, b'nf.js') == []
+        result = self._process(mgr, b'on\n')
+        assert result == ['K:/conf.json\n']
+
+    def test_complete_plus_partial(self) -> None:
+        """A chunk with a complete line followed by a partial fragment."""
+        mgr = self._make_manager()
+        result1 = self._process(mgr, b'line1\npart')
+        assert result1 == ['line1\n']
+
+        result2 = self._process(mgr, b'ial\n')
+        assert result2 == ['partial\n']
+
+    def test_empty_lines_preserved(self) -> None:
+        """Empty lines (consecutive \\n) are yielded as empty strings + newline."""
+        mgr = self._make_manager()
+        result = self._process(mgr, b'a\n\nb\n')
+        assert result == ['a\n', '\n', 'b\n']
+
+    def test_timestamps_added_when_enabled(self) -> None:
+        """When add_timestamps=True, each line gets a timestamp prefix."""
+        mgr = SerialManager(name='test', device_path='/dev/null', add_timestamps=True, start=False)
+        result = self._process(mgr, b'hello\n')
+        assert len(result) == 1
+        assert result[0].startswith('[')
+        assert 'hello' in result[0]

@@ -80,7 +80,7 @@ class CerealServer(socketserver.ThreadingTCPServer):
         """
         Initializer
 
-        :param name: Nickname for the server (e.g. 'RTOS', 'Linux')
+        :param name: Nickname for the server (e.g. 'DeviceA', 'DeviceB')
         :param address: The ipaddress or host name on which the server should listen
         :param port: The port number that the server communicates through
         :param device_path: The path to a serial device

@@ -337,6 +337,7 @@ class SerialManager(threading.Thread):
         self.__talking_stick = threading.Lock()
         self.__stop_event = threading.Event()
         self.__processing_input = False  # input to this system from the serial device
+        self.__line_buffer: str = ''  # Holds trailing partial line across read() calls
 
         self.device:            serial.Serial | None = None
         self.listeners:         list[SerialListener] = []
@@ -447,22 +448,23 @@ class SerialManager(threading.Thread):
         """
         Generator Method
 
-        Split raw bytes from the serial device into lines, prepending timestamps to each
+        Split raw bytes from the serial device into lines, prepending timestamps to each.
+        Incomplete trailing fragments are buffered in ``__line_buffer`` and prepended to the
+        next chunk so that log lines are never split across two timestamps.
 
         :param raw: Raw bytes read from the serial device
         """
 
-        text = raw.decode(encoding='utf-8', errors='ignore')
+        text = self.__line_buffer + raw.decode(encoding='utf-8', errors='ignore')
+        self.__line_buffer = ''
         lines = text.split('\n')
 
-        for line in lines[:-1]:  # last line may be incomplete
+        # Last element is either '' (if text ended with \n) or an incomplete fragment
+        self.__line_buffer = lines.pop()
+
+        for line in lines:
             timestamp = f'[{get_timestamp()}] ' if self.add_timestamps else ''
             yield f'{timestamp}{line}\n'
-
-        # Keep the last (possibly incomplete) fragment for the caller to handle
-        if lines[-1]:
-            timestamp = f'[{get_timestamp()}] ' if self.add_timestamps else ''
-            yield f'{timestamp}{lines[-1]}\n'
 
 
     def run(self) -> None:

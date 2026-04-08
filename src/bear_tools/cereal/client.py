@@ -330,7 +330,7 @@ class CerealClient(threading.Thread):
         are visually distinct.
 
         :param text: Message (command) to send
-        :param expect_output: If True, return camera output up to {timeout_sec} after sending the message
+        :param expect_output: If True, return device output up to {timeout_sec} after sending the message
         :param timeout_sec: How long to wait for expected output to start+stop before returning whatever we have
         :return: If {expect_output}, a list[str] containing output observed a result of sending {text}; otherwise, []
         """
@@ -345,7 +345,7 @@ class CerealClient(threading.Thread):
         Used internally by :meth:`send` and :meth:`annotate`.
 
         :param text: Message (command) to send
-        :param expect_output: If True, return camera output up to {timeout_sec} after sending the message
+        :param expect_output: If True, return device output up to {timeout_sec} after sending the message
         :param timeout_sec: How long to wait for expected output to start+stop before returning whatever we have
         :return: If {expect_output}, a list[str] containing output observed a result of sending {text}; otherwise, []
         """
