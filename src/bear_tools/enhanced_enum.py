@@ -38,7 +38,7 @@ class EnhancedEnum(Enum):
         """Return the member whose value equals `value`, or None if not found."""
         try:
             return cls(value)
-        except ValueError:
+        except (ValueError, TypeError):
             return None
 
     @classmethod
@@ -46,7 +46,7 @@ class EnhancedEnum(Enum):
         """Return the member name for `value`, or None if not found."""
         try:
             return cls(value).name
-        except ValueError:
+        except (ValueError, TypeError):
             return None
 
 

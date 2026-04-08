@@ -287,7 +287,8 @@ class TestEnhancedIntEnum:
         assert TestIntEnum.FIRST in TestIntEnum
 
         # Test string representation
-        assert str(TestIntEnum.FIRST) == "TestIntEnum.FIRST"
+        # IntEnum.__str__ returns the int value as a string in Python 3.11+
+        assert str(TestIntEnum.FIRST) == "1"
         assert repr(TestIntEnum.FIRST) == "<TestIntEnum.FIRST: 1>"
 
     @pytest.mark.parametrize("enum_class", [TestIntEnum, SingleValueEnum])
