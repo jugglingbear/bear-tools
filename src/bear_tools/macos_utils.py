@@ -46,7 +46,10 @@ def get_current_ssid_macos15(interface: str = 'en0') -> str | None:
     """
 
     try:
-        output: str = subprocess.check_output(['ipconfig', 'getsummary', f'{interface}']).decode()
+        output: str = subprocess.check_output(
+            ['ipconfig', 'getsummary', f'{interface}'],
+            stderr=subprocess.DEVNULL
+        ).decode()
         # Require the captured ASCII token to run right up to the newline.
         # This prevents partial matches like "Caf" from "CaféNet".
         regex: str = r'\n\s+SSID : ([\x20-\x7E]{1,32})(?=\n)'
